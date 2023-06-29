@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\Type;
+use App\Models\Img;
 
 
 class ProjectController extends Controller
@@ -86,8 +87,9 @@ class ProjectController extends Controller
     {
         $project= Project::where('id', $id)
         ->get();
+        $imgs=Img::where('prj_id', $id)->get();
         $options = Type::pluck('text', 'id');
-        return view('projects.edit', ['project'=>$project,'options'=>$options]);
+        return view('projects.edit', ['project'=>$project,'options'=>$options,'imgs'=>$imgs]);
     }
 
     /**

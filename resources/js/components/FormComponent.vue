@@ -1,30 +1,32 @@
 <template>
     <div id='app'>
-        <form method="POST" action="" class="w-100 row  mt-3">
+        <form method="POST" action="" class="w-100 row  mt-3" >
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">專案名稱</label>
                 <input class="form-control" id='name' name='name' :value="data[0].name">
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">類型</label>
-                <select name="type_id" class="form-select " v-model="data[0].type_id">
-                    
-                    <option v-for="(type,index) in typeOptions" 
-                        :value="index">{{ type }}</option>
-
+                <select name="type_id" class="form-select">
+                    <option v-for="(type, index) in typeOptions" 
+                    :value="index"
+                    :selected="data[0].type_id === index ? true : false"
+                    >{{ type }}</option>
+                    <!-- v-for內 :selected 直接寫?'select':'' 會吃不到 只能用t/f -->
                 </select>
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">客戶名稱</label>
-                <input class="form-control" id='client' name='client' :value="data[0].client === null ?'private':''">
+                <input class="form-control" id='client' name='client' :value="data[0].client === null ? 'private' : ''">
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">專案地點</label>
-                <input class="form-control" id='location' name='location' :value="data[0].location === null ?'private':''">
+                <input class="form-control" id='location' name='location'
+                    :value="data[0].location === null ? 'private' : ''">
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">金額</label>
-                <input class="form-control" id='value' name='value' :value="data[0].value === null ?'private':''">
+                <input class="form-control" id='value' name='value' :value="data[0].value === null ? 'private' : ''">
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">攝影由...</label>
@@ -33,20 +35,53 @@
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">是否顯示在前台?</label>
                 <select name="show" id="show" class="form-select">
-                    <option value="1" :selected="data[0].show === 1 ?'selected':''">是</option>
-                    <option value="0" :selected="data[0].show === 0 ?'selected':''">否</option>
+                    <option value="1" :selected="data[0].show === 1 ? 'selected' : ''">是</option>
+                    <option value="0" :selected="data[0].show === 0 ? 'selected' : ''">否</option>
                 </select>
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">是否呈現在首頁?</label>
                 <select name="master" id="master" class="form-select">
-                    <option value="1" :selected="data[0].show === 1 ?'selected':''">是</option>
-                    <option value="0" :selected="data[0].show === 0 ?'selected':''">否</option>
+                    <option value="1" :selected="data[0].show === 1 ? 'selected' : ''">是</option>
+                    <option value="0" :selected="data[0].show === 0 ? 'selected' : ''">否</option>
                 </select>
             </div>
             <div class="form-group  w-100 mt-3">
                 <label class="control-label fs-5">描述</label>
-                <textarea name="description" id="description" cols="30" rows="5" class="form-control" >{{ data[0].description }}</textarea>
+                <textarea name="description" id="description" cols="30" rows="5"
+                    class="form-control">{{ data[0].description }}</textarea>
+            </div>
+            <div class="form-group w-100 mt-3">
+                <table class="table">
+                    <thead class='thead-dark'>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">圖片</th>
+                            <th scope="col">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(img, index) in imgdata">
+                            <td>{{ countIndex(index,this.imgdata) }}</td>
+                            <!-- <td><img :src="img" height="250" :alt="index" v-if="v != ''" /></td> -->
+                            <td><img :src="img" height="250" :alt="index" v-if="img != ''" /></td>
+                            <td>
+                                <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg">
+                                <button class="btn btn-danger" type="button" @click="delimg(index)" v-if="img !=''">項次刪除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row"></th>
+                            <td colspan="2" class="text-end "><button @click='addImgItem()' type="button"
+                                    class="btn btn-light">新增項次</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="w-100 justify-content-md-center d-grid  d-md-flex mb-3 mt-2">
+                <button type="button" class="btn btn-warning btn-lg" @click="save()">儲存</button>
+                <div class="m-1"></div>
+                <button type="button" class="btn btn-info btn-lg" @click="back()">返回</button>
             </div>
         </form>
     </div>
@@ -57,9 +92,73 @@ export default {
     mounted() {
         console.log('Component mounted.')
     },
-    props: ['data', 'createRoute','editRoute','up','typeOptions'],
-    methods: {
+    data() {
+        return {
+            imgdata: this.imgs,
+            type_id: this.data[0].type_id,
+        }
 
+    },
+    props: ['data', 'createRoute', 'editRoute', 'up', 'typeOptions', 'imgs'],
+    methods: {
+        fileId(index) {
+            return "prj-file-" + index;
+        },
+        fileName(index) {
+            return "prj[file][" + index + "]";
+        },
+        addImgItem() {
+            if (this.checkUpload(this.imgdata)=== false & this.imgdata.length!=0) {
+                alert("請先上傳所有圖片。")
+            } else {
+                let list = Object.keys(this.imgdata);
+                let numberArray = [];
+                length = list.length;
+                for (var i = 0; i < length; i++) {
+                    numberArray.push(parseInt(list[i]));
+                }
+                let us = Math.max(...numberArray) + 1;
+                if (us == -Infinity) {
+                    us = 1;
+                }
+                this.imgdata.splice(us, 0, '');
+            }
+        },
+        checkUpload(data) {
+            //    新增圖片項次前檢查是否有上傳圖片
+            let emptyInputs = []
+            for (let key in data) {
+                let inputFile = document.getElementById(this.fileId(key))
+                let uploadImg = inputFile.parentElement.parentElement.children[1].firstChild
+                if (inputFile.files.length == 0 && uploadImg.length == 0) {
+                    emptyInputs.push(key)
+                }
+            }
+            if (emptyInputs.length > 0) {
+                return true;
+            }else{
+                return false;
+            }
+        },
+        // 圖片表格編號以計數呈現，不依資料庫中順序欄位
+        countIndex(index, datafile) {
+            const keys = Object.keys(datafile);
+            const counter = keys.indexOf(index.toString());
+            return counter !== -1 ? counter + 1 : keys.length;
+        },
+        delimg(index){
+            delete this.imgdata[index];
+        },
+        back(){
+            window.history.back()
+        },
+        save(){
+            if(this.up === true){
+                console.log('update');
+            }else{
+                console.log('create');
+            }
+        }
     }
 }
 </script>
