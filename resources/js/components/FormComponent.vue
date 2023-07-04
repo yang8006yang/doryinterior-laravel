@@ -1,13 +1,13 @@
 <template>
     <div id='app'>
-        <form method="POST" action="" class="w-100 row  mt-3" >
+        <form method="POST" action="" class="w-100 row mt-3">
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">專案名稱</label>
-                <input class="form-control" id='name' name='name' :value="data[0].name">
+                <input class="form-control" id='name' name='name' v-model="formdata.name">
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">類型</label>
-                <select name="type_id" class="form-select">
+                <select name="type_id" class="form-select" v-model="formdata.type_id">
                     <option v-for="(type, index) in typeOptions" 
                     :value="index"
                     :selected="data[0].type_id === index ? true : false"
@@ -17,38 +17,38 @@
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">客戶名稱</label>
-                <input class="form-control" id='client' name='client' :value="data[0].client === null ? 'private' : ''">
+                <input class="form-control" id='client' name='client' v-model="formdata.client" placeholder="private">
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">專案地點</label>
                 <input class="form-control" id='location' name='location'
-                    :value="data[0].location === null ? 'private' : ''">
+                v-model="formdata.location" placeholder="private">
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">金額</label>
-                <input class="form-control" id='value' name='value' :value="data[0].value === null ? 'private' : ''">
+                <input class="form-control" id='value' name='value' v-model="formdata.value" placeholder="private">
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">攝影由...</label>
-                <input class="form-control" id='photoby' name='photoby' :value="data[0].photoby">
+                <input class="form-control" id='photoby' name='photoby'  v-model="formdata.photoby" >
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">是否顯示在前台?</label>
-                <select name="show" id="show" class="form-select">
+                <select name="show" id="show" class="form-select" v-model="formdata.show">
                     <option value="1" :selected="data[0].show === 1 ? 'selected' : ''">是</option>
                     <option value="0" :selected="data[0].show === 0 ? 'selected' : ''">否</option>
                 </select>
             </div>
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">是否呈現在首頁?</label>
-                <select name="master" id="master" class="form-select">
-                    <option value="1" :selected="data[0].show === 1 ? 'selected' : ''">是</option>
-                    <option value="0" :selected="data[0].show === 0 ? 'selected' : ''">否</option>
+                <select name="master" id="master" class="form-select" v-model="formdata.master">
+                    <option value="1" :selected="data[0].master === 1 ? 'selected' : ''">是</option>
+                    <option value="0" :selected="data[0].master === 0 ? 'selected' : ''">否</option>
                 </select>
             </div>
             <div class="form-group  w-100 mt-3">
                 <label class="control-label fs-5">描述</label>
-                <textarea name="description" id="description" cols="30" rows="5"
+                <textarea name="description" id="description" cols="30" rows="5" v-model="formdata.description"
                     class="form-control">{{ data[0].description }}</textarea>
             </div>
             <div class="form-group w-100 mt-3">
@@ -66,7 +66,7 @@
                             <!-- <td><img :src="img" height="250" :alt="index" v-if="v != ''" /></td> -->
                             <td><img :src="img" height="250" :alt="index" v-if="img != ''" /></td>
                             <td>
-                                <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg">
+                                <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg" @change="uploadImg(index)">
                                 <button class="btn btn-danger" type="button" @click="delimg(index)" v-if="img !=''">項次刪除</button>
                             </td>
                         </tr>
@@ -86,7 +86,6 @@
         </form>
     </div>
 </template>
-
 <script>
 export default {
     mounted() {
@@ -95,7 +94,8 @@ export default {
     data() {
         return {
             imgdata: this.imgs,
-            type_id: this.data[0].type_id,
+            // type_id: this.data[0].type_id,
+            formdata :this.data[0]
         }
 
     },
@@ -152,9 +152,16 @@ export default {
         back(){
             window.history.back()
         },
+        // uploadImg(e,index){
+        //     console.log(e.target.files.item(0));
+        //     // this.imgdata[index] = e.target.files.item(0)
+        // },
         save(){
             if(this.up === true){
-                console.log('update');
+                // let data = this.formdata.concat(this.imgdata);
+               window.axios.put(`/projects/${ this.formdata.id}`,this.formdata).then((res)=>{
+                console.log(res);
+               })
             }else{
                 console.log('create');
             }

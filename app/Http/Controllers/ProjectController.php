@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Project;
 use App\Models\Type;
 use App\Models\Img;
@@ -101,7 +103,23 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $input=$request->except(['_token','_method']);
+        $data=Project::findOrFail($id);
+        
+        $data->name = $input['name'];
+        $data->client = $input['client'];
+        $data->description = $input['description'];
+        $data->location = $input['location'];
+        $data->photoby = $input['photoby'];
+        $data->master = $input['master'];
+        $data->show = $input['show'];
+        $data->type_id = $input['type_id'];
+        $data->value = $input['value'];
+        $data->modby = Auth::id();
+
+        $data->save();
+
+        return response(null, Response::HTTP_OK);
     }
 
     /**
