@@ -64,9 +64,9 @@
                         <tr v-for="(img, index) in imgdata">
                             <td>{{ countIndex(index,this.imgdata) }}</td>
                             <!-- <td><img :src="img" height="250" :alt="index" v-if="v != ''" /></td> -->
-                            <td><img :src="img" height="250" :alt="index" v-if="img != ''" /></td>
+                            <td><img :src="img" height="250" :alt="index" v-if="img != ''"/></td>
                             <td>
-                                <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg" @change="uploadImg(index)">
+                                <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg" @change="uploadImg($event, index)">
                                 <button class="btn btn-danger" type="button" @click="delimg(index)" v-if="img !=''">項次刪除</button>
                             </td>
                         </tr>
@@ -94,8 +94,11 @@ export default {
     data() {
         return {
             imgdata: this.imgs,
-            // type_id: this.data[0].type_id,
+            upimg : {
+                'imgs' : []
+            },
             formdata :this.data[0]
+
         }
 
     },
@@ -108,7 +111,7 @@ export default {
             return "prj[file][" + index + "]";
         },
         addImgItem() {
-            if (this.checkUpload(this.imgdata)=== false & this.imgdata.length!=0) {
+            if (this.checkUpload(this.imgdata)=== false && this.imgdata.length!= 0) {
                 alert("請先上傳所有圖片。")
             } else {
                 let list = Object.keys(this.imgdata);
@@ -130,11 +133,12 @@ export default {
             for (let key in data) {
                 let inputFile = document.getElementById(this.fileId(key))
                 let uploadImg = inputFile.parentElement.parentElement.children[1].firstChild
-                if (inputFile.files.length == 0 && uploadImg.length == 0) {
+                // 4是v-if
+                if (inputFile.files.length == 0  &&  (uploadImg.length == 0 || uploadImg.length <= 4)) {
                     emptyInputs.push(key)
                 }
             }
-            if (emptyInputs.length > 0) {
+            if (emptyInputs.length <= 0) {
                 return true;
             }else{
                 return false;
@@ -152,14 +156,15 @@ export default {
         back(){
             window.history.back()
         },
-        // uploadImg(e,index){
-        //     console.log(e.target.files.item(0));
-        //     // this.imgdata[index] = e.target.files.item(0)
-        // },
+        uploadImg(e,index){
+            console.log(e.target.files.item(0));
+            let img = e.target.files.item(0);
+            this.upimg['imgs'][index]=img;
+        },
         save(){
             if(this.up === true){
-                // let data = this.formdata.concat(this.imgdata);
-               window.axios.put(`/projects/${ this.formdata.id}`,this.formdata).then((res)=>{
+                let data = this.formdata.concat(this.upimg);
+               window.axios.put(`/projects/${ this.formdata.id}`,data).then((res)=>{
                 console.log(res);
                })
             }else{
