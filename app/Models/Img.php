@@ -10,6 +10,6 @@ class Img extends Model
     use HasFactory;
 
     function project() {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Project::class,'prj_id','id');
     }
 }
