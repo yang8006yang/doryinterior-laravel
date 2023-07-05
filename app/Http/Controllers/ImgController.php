@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Img;
 use Illuminate\Http\Request;
 
+
 class ImgController extends Controller
 {
     /**
@@ -35,7 +36,17 @@ class ImgController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // var_dump($request->all());
+        $input = $request->all();
+        // var_dump($input['img0']);
+        $imgs = $request->file('img');
+        
+        $data = $input['prj_id'];
+        var_dump($data);
+        var_dump($imgs);
+
+
+        return "OK";
     }
 
     /**

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BackController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ImgController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +26,9 @@ Route::get('/test', function () {
     return view('example');
 })->name('test');
 
-Route::resource('projects',ProjectController::class)->middleware('auth');;
+Route::resource('projects',ProjectController::class)->middleware('auth');
+Route::resource('imgs',ImgController::class)->middleware('auth');
+
 
 
 

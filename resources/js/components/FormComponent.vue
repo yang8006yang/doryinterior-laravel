@@ -157,15 +157,24 @@ export default {
             window.history.back()
         },
         uploadImg(e,index){
-            console.log(e.target.files.item(0));
+            // console.log(e.target.files.item(0));
             let img = e.target.files.item(0);
             this.upimg['imgs'][index]=img;
         },
         save(){
             if(this.up === true){
-                let data = this.formdata.concat(this.upimg);
-               window.axios.put(`/projects/${ this.formdata.id}`,data).then((res)=>{
-                console.log(res);
+                // this.formdata['imgs'] = this.upimg['imgs'];
+                window.axios.put(`/projects/${ this.formdata.id }`,this.formdata).then((res)=>{
+                    // 上傳圖片要FormData
+                    let formData = new FormData();
+                    // 多圖片放入formData
+                    Object.keys(this.upimg['imgs']).forEach(key => {
+                        formData.append(`img[${key}]`, this.upimg['imgs'][key])
+                    })
+                    formData.append('prj_id', this.formdata.id)
+                    window.axios.post(`/imgs`,formData).then((res)=>{
+                        console.log(res);
+                    })
                })
             }else{
                 console.log('create');
