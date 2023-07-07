@@ -64,7 +64,7 @@
                         <tr v-for="(img, index) in imgdata">
                             <td>{{ countIndex(index,this.imgdata) }}</td>
                             <!-- <td><img :src="img" height="250" :alt="index" v-if="v != ''" /></td> -->
-                            <td><img :src="img" height="250" :alt="index" v-if="img != ''"/></td>
+                            <td><img :src="img.folder" height="250" :alt="index" v-if="img != ''"/></td>
                             <td>
                                 <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg" @change="uploadImg($event, index)">
                                 <button class="btn btn-danger" type="button" @click="delimg(index)" v-if="img !=''">項次刪除</button>
@@ -90,6 +90,7 @@
 export default {
     mounted() {
         console.log('Component mounted.')
+        console.log(this.imgdata);
     },
     data() {
         return {
@@ -174,7 +175,9 @@ export default {
                     formData.append('prj_id', this.formdata.id)
                     formData.append('type', '0')
                     window.axios.post(`/imgs`,formData).then((res)=>{
-                        console.log(res);
+                        var currentUrl = window.location.href;
+                        var newUrl = currentUrl.replace('/edit', '');
+                        location.replace(newUrl);
                     })
                })
             }else{

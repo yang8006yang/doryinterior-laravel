@@ -44,6 +44,7 @@ class ImgController extends Controller
             $subFileName = $img->getClientOriginalExtension();
             $fileName = "prj_{$prjId}_{$key}.".$subFileName;
             $storagePath = Storage::putFileAs('/public/imgs', $img, $fileName);
+            $imageUrl = Storage::url($storagePath);
 
             // 以亂數名稱存圖檔到指定位置
             // $storagePath = Storage::put('/public/imgs',  $img);
@@ -54,11 +55,12 @@ class ImgController extends Controller
                 $data=new Img;
                 $data->prj_id = $prjId;
                 $data->pic_name = $fileName;
-                $data->folder = '/public/imgs';
+                $data->folder = $imageUrl;
                 $data->seq= $key ;
                 $data->save();
             }else{
                 $query->pic_name = $fileName;
+                $query->folder = $imageUrl;
                 $query->save();
             }
             
