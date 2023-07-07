@@ -1,5 +1,5 @@
 <template>
-    <div id='app'>
+    <!-- <div id='app'> -->
         <form method="POST" action="" class="w-100 row mt-3">
             <div class="form-group  w-50 mt-3">
                 <label class="control-label fs-5">專案名稱</label>
@@ -84,7 +84,7 @@
                 <button type="button" class="btn btn-info btn-lg" @click="back()">返回</button>
             </div>
         </form>
-    </div>
+    <!-- </div> -->
 </template>
 <script>
 export default {
@@ -172,6 +172,7 @@ export default {
                         formData.append(`img[${key}]`, this.upimg['imgs'][key])
                     })
                     formData.append('prj_id', this.formdata.id)
+                    formData.append('type', '0')
                     window.axios.post(`/imgs`,formData).then((res)=>{
                         console.log(res);
                     })

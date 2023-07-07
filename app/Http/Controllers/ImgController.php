@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Img;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Storage;
 
 class ImgController extends Controller
 {
@@ -36,14 +36,37 @@ class ImgController extends Controller
      */
     public function store(Request $request)
     {
-        // var_dump($request->all());
+        try {
         $input = $request->all();
-        // var_dump($input['img0']);
+        $prjId = $input['prj_id'];
         $imgs = $request->file('img');
-        
-        $data = $input['prj_id'];
-        var_dump($data);
-        var_dump($imgs);
+        foreach ($imgs as $key => $img) {
+            $subFileName = $img->getClientOriginalExtension();
+            $fileName = "prj_{$prjId}_{$key}.".$subFileName;
+            $storagePath = Storage::putFileAs('/public/imgs', $img, $fileName);
+
+            // 以亂數名稱存圖檔到指定位置
+            // $storagePath = Storage::put('/public/imgs',  $img);
+            // $fileName = basename($storagePath);
+
+            $query = Img::where([['prj_id','=',$prjId],['seq','=',$key]])->first();
+            if(empty($query)){
+                $data=new Img;
+                $data->prj_id = $prjId;
+                $data->pic_name = $fileName;
+                $data->folder = '/public/imgs';
+                $data->seq= $key ;
+                $data->save();
+            }else{
+                $query->pic_name = $fileName;
+                $query->save();
+            }
+            
+        }
+    } catch (\Exception $e) {
+        return $e;
+    }
+
 
 
         return "OK";
