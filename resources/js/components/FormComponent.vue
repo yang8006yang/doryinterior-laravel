@@ -63,8 +63,7 @@
                     <tbody>
                         <tr v-for="(img, index) in imgdata">
                             <td>{{ countIndex(index,this.imgdata) }}</td>
-                            <!-- <td><img :src="img" height="250" :alt="index" v-if="v != ''" /></td> -->
-                            <td><img :src="img.folder" height="250" :alt="index" v-if="img != ''"/></td>
+                            <td><img :src="img" height="250" :alt="index" v-if="img != ''"/></td>
                             <td>
                                 <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg" @change="uploadImg($event, index)">
                                 <button class="btn btn-danger" type="button" @click="delimg(index)" v-if="img !=''">項次刪除</button>
@@ -90,21 +89,30 @@
 export default {
     mounted() {
         console.log('Component mounted.')
+        this.imgs.map(img =>{ 
+            this.imgdata[img.seq]=img.img_path;
+        });
         console.log(this.imgdata);
     },
     data() {
         return {
-            imgdata: this.imgs,
+            imgdata: [],
             upimg : {
                 'imgs' : []
             },
-            formdata :this.data[0]
+            formdata :this.data[0],
+            delimgid :[],
 
         }
 
     },
     props: ['data', 'createRoute', 'editRoute', 'up', 'typeOptions', 'imgs'],
     methods: {
+        doinit(){
+            this.imgdata = this.imgs.map(img => {
+            this.imgdata[img.seq] = img.img_path;
+            })
+        },
         fileId(index) {
             return "prj-file-" + index;
         },
@@ -152,7 +160,8 @@ export default {
             return counter !== -1 ? counter + 1 : keys.length;
         },
         delimg(index){
-            delete this.imgdata[index];
+            this.delimgid.push(this.imgdata[index]['id']);
+            this.imgdata.splice(index, 1);
         },
         back(){
             window.history.back()
@@ -174,10 +183,13 @@ export default {
                     })
                     formData.append('prj_id', this.formdata.id)
                     formData.append('type', '0')
+                    formData.append('del', this.delimgid)
+    
                     window.axios.post(`/imgs`,formData).then((res)=>{
                         var currentUrl = window.location.href;
                         var newUrl = currentUrl.replace('/edit', '');
                         location.replace(newUrl);
+                        console.log(res);
                     })
                })
             }else{

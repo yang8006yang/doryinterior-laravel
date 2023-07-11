@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Img;
+use Hamcrest\Arrays\IsArray;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -40,38 +41,48 @@ class ImgController extends Controller
         $input = $request->all();
         $prjId = $input['prj_id'];
         $imgs = $request->file('img');
-        foreach ($imgs as $key => $img) {
-            $subFileName = $img->getClientOriginalExtension();
+        // $imgKeys=array();
+
+        // if (is_array($imgs)) {
+            foreach ($imgs as $key => $img) {
+                $subFileName = $img->getClientOriginalExtension();
             $fileName = "prj_{$prjId}_{$key}.".$subFileName;
             $storagePath = Storage::putFileAs('/public/imgs', $img, $fileName);
             $imageUrl = Storage::url($storagePath);
-
+            
             // 以亂數名稱存圖檔到指定位置
             // $storagePath = Storage::put('/public/imgs',  $img);
             // $fileName = basename($storagePath);
 
+            // 資料表沒有的 傳來有
             $query = Img::where([['prj_id','=',$prjId],['seq','=',$key]])->first();
             if(empty($query)){
                 $data=new Img;
                 $data->prj_id = $prjId;
                 $data->pic_name = $fileName;
-                $data->folder = $imageUrl;
+                $data->img_path = $imageUrl;
                 $data->seq= $key ;
                 $data->save();
             }else{
                 $query->pic_name = $fileName;
-                $query->folder = $imageUrl;
+                $query->img_path = $imageUrl;
                 $query->save();
             }
             
-        }
+        // }
+    }
+        
+        // // 刪除圖片
+        // Img::destroy($input['del']);
+        // var_dump($input['del']);
+        
     } catch (\Exception $e) {
         return $e;
     }
+    
+    
 
-
-
-        return "OK";
+        // return "OK";
     }
 
     /**
