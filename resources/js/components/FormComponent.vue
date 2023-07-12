@@ -66,6 +66,10 @@
                             <td v-if="img !== undefined "><img :src="img.img_path" height="250" :alt="index" v-if="img != ''"/></td>
                             <td v-if="img !== undefined ">
                                 <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg" @change="uploadImg($event, index)">
+                                <div class="pt-3 pb-3 form-check">
+                                    <input class="form-check-input" type="checkbox" name="masterimg" :id="'masterimg'+ img.id" :checked="img.master == 1" @click="setmaster(img.id)">
+                                    <label class="form-check-label" :for="'masterimg' + img.id">專案封面</label>
+                                </div>
                                 <button class="btn btn-danger" type="button" @click="delimg(index,img.id)" v-if="img !=''">項次刪除</button>
                             </td>
                         </tr>
@@ -94,7 +98,6 @@ export default {
                 this.imgdata[img.seq]=img;
             }
         });
-        console.log(this.imgdata);
     },
     data() {
         return {
@@ -104,6 +107,7 @@ export default {
             },
             formdata :this.data[0],
             delimgid :[],
+            masterimg:'',
 
         }
 
@@ -174,6 +178,9 @@ export default {
             let img = e.target.files.item(0);
             this.upimg['imgs'][index]=img;
         },
+        setmaster(id){
+            this.masterimg = id;
+        },
         save(){
             if(this.up === true){
                 // this.formdata['imgs'] = this.upimg['imgs'];
@@ -187,6 +194,7 @@ export default {
                     formData.append('prj_id', this.formdata.id)
                     formData.append('type', '0')
                     formData.append('del[]', this.delimgid)
+                    formData.append('masterimg', this.masterimg)
     
                     window.axios.post(`/imgs`,formData).then((res)=>{
                         var currentUrl = window.location.href;
@@ -197,6 +205,14 @@ export default {
                })
             }else{
                 console.log('create');
+            }
+        }
+    },
+    watch:{
+        masterimg:{
+            handler(){
+                $("[name='masterimg']").prop("checked", false);
+                $(`#masterimg${this.masterimg}`).prop("checked", true);
             }
         }
     }

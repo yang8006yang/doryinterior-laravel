@@ -12,4 +12,9 @@ class Img extends Model
     function project() {
         return $this->belongsTo(Project::class,'prj_id','id');
     }
+
+    protected $fillable = [
+        'master',
+
+    ];
 }

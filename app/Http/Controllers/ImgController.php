@@ -43,7 +43,9 @@ class ImgController extends Controller
         $imgs = $request->file('img')??[];
         $del = $input['del'];
         $del =explode(',',$del[0]);
-
+        $masterimg = $input['masterimg'];
+        
+        
         foreach ($imgs as $key => $img) {
             $subFileName = $img->getClientOriginalExtension();
             $fileName = "prj_{$prjId}_{$key}.".$subFileName;
@@ -56,6 +58,7 @@ class ImgController extends Controller
 
             $query = Img::where([['prj_id','=',$prjId],['seq','=',$key]])->first();
             if(empty($query)){
+                //新增
                 $data=new Img;
                 $data->prj_id = $prjId;
                 $data->pic_name = $fileName;
@@ -63,15 +66,23 @@ class ImgController extends Controller
                 $data->seq= $key ;
                 $data->save();
             }else{
+                //更新
                 $query->pic_name = $fileName;
                 $query->img_path = $imageUrl;
                 $query->save();
             }
-    }
-    // // 刪除圖片
+        }
+    // 刪除圖片
         if(!empty($del)){
             Img::destroy($del);
         }
+
+    //設定封面圖片
+    if ($masterimg !=='') {
+        Img::where([['prj_id','=',$prjId]])->update(['master'=> 0]);
+        Img::find($masterimg)->update(['master'=> 1]);
+    }
+
         
     } catch (\Exception $e) {
         return $e;
