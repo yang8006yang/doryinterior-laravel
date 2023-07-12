@@ -61,12 +61,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(img, index) in imgdata">
-                            <td>{{ countIndex(index,this.imgdata) }}</td>
-                            <td><img :src="img" height="250" :alt="index" v-if="img != ''"/></td>
-                            <td>
+                        <tr v-for="(img, index) in imgdata" >
+                            <td v-if="img !== undefined ">{{ countIndex(index,this.imgdata) }}</td>
+                            <td v-if="img !== undefined "><img :src="img.img_path" height="250" :alt="index" v-if="img != ''"/></td>
+                            <td v-if="img !== undefined ">
                                 <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg" @change="uploadImg($event, index)">
-                                <button class="btn btn-danger" type="button" @click="delimg(index)" v-if="img !=''">項次刪除</button>
+                                <button class="btn btn-danger" type="button" @click="delimg(index,img.id)" v-if="img !=''">項次刪除</button>
                             </td>
                         </tr>
                         <tr>
@@ -90,7 +90,9 @@ export default {
     mounted() {
         console.log('Component mounted.')
         this.imgs.map(img =>{ 
-            this.imgdata[img.seq]=img.img_path;
+            if(img.img_path !== ''){
+                this.imgdata[img.seq]=img;
+            }
         });
         console.log(this.imgdata);
     },
@@ -159,9 +161,10 @@ export default {
             const counter = keys.indexOf(index.toString());
             return counter !== -1 ? counter + 1 : keys.length;
         },
-        delimg(index){
-            this.delimgid.push(this.imgdata[index]['id']);
+        delimg(index,id){
             this.imgdata.splice(index, 1);
+            this.delimgid.push(id);
+            console.log(this.delimgid);
         },
         back(){
             window.history.back()
@@ -183,12 +186,12 @@ export default {
                     })
                     formData.append('prj_id', this.formdata.id)
                     formData.append('type', '0')
-                    formData.append('del', this.delimgid)
+                    formData.append('del[]', this.delimgid)
     
                     window.axios.post(`/imgs`,formData).then((res)=>{
                         var currentUrl = window.location.href;
                         var newUrl = currentUrl.replace('/edit', '');
-                        location.replace(newUrl);
+                        // location.replace(newUrl);
                         console.log(res);
                     })
                })

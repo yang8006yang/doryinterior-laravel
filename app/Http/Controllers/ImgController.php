@@ -40,12 +40,12 @@ class ImgController extends Controller
         try {
         $input = $request->all();
         $prjId = $input['prj_id'];
-        $imgs = $request->file('img');
-        // $imgKeys=array();
+        $imgs = $request->file('img')??[];
+        $del = $input['del'];
+        $del =explode(',',$del[0]);
 
-        // if (is_array($imgs)) {
-            foreach ($imgs as $key => $img) {
-                $subFileName = $img->getClientOriginalExtension();
+        foreach ($imgs as $key => $img) {
+            $subFileName = $img->getClientOriginalExtension();
             $fileName = "prj_{$prjId}_{$key}.".$subFileName;
             $storagePath = Storage::putFileAs('/public/imgs', $img, $fileName);
             $imageUrl = Storage::url($storagePath);
@@ -54,7 +54,6 @@ class ImgController extends Controller
             // $storagePath = Storage::put('/public/imgs',  $img);
             // $fileName = basename($storagePath);
 
-            // 資料表沒有的 傳來有
             $query = Img::where([['prj_id','=',$prjId],['seq','=',$key]])->first();
             if(empty($query)){
                 $data=new Img;
@@ -68,21 +67,16 @@ class ImgController extends Controller
                 $query->img_path = $imageUrl;
                 $query->save();
             }
-            
-        // }
     }
-        
-        // // 刪除圖片
-        // Img::destroy($input['del']);
-        // var_dump($input['del']);
+    // // 刪除圖片
+        if(!empty($del)){
+            Img::destroy($del);
+        }
         
     } catch (\Exception $e) {
         return $e;
     }
-    
-    
 
-        // return "OK";
     }
 
     /**
