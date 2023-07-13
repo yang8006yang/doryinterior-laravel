@@ -56,10 +56,15 @@ class ProjectController extends Controller
         $data->show=$request->show;
         $data->master=$request->master;
         $data->user_id=$request->user_id;
-        
-        $data->save();
+        try{
 
-        return redirect()->route('projects.index');
+            $data->save();
+        }catch(\Exception $e){
+            var_dump($e->getMessage());
+        }
+        // var_dump($request->name);
+
+        // return redirect()->route('projects.index');
     }
 
     /**

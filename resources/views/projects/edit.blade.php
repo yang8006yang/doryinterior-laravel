@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-
+<hr>
+<h1>編輯專案 - {{ $project[0]->name }}</h1>
+<hr>
 <?php
 // dd($project->first()->id);
 ?>

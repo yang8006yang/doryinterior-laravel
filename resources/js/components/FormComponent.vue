@@ -3,15 +3,13 @@
     <form method="POST" action="" class="w-100 row mt-3">
         <div class="form-group  w-50 mt-3">
             <label class="control-label fs-5">專案名稱</label>
-            <input class="form-control" id='name' name='name' v-model="formdata.name">
+            <input class="form-control" id='name' name='name' v-model="formdata.name" required>
         </div>
         <div class="form-group  w-50 mt-3">
             <label class="control-label fs-5">類型</label>
             <select name="type_id" class="form-select" v-model="formdata.type_id">
-                <option v-for="(type, index) in typeOptions" 
-                :value="index"
-                :selected="data[0].type_id === index ? true : false"
-                >{{ type }}</option>
+                <option v-for="(type, index) in typeOptions" :value="index"
+                    :selected="formdata.type_id === index ? true : false">{{ type }}</option>
                 <!-- v-for內 :selected 直接寫?'select':'' 會吃不到 只能用t/f -->
             </select>
         </div>
@@ -34,21 +32,21 @@
         <div class="form-group  w-50 mt-3">
             <label class="control-label fs-5">是否顯示在前台?</label>
             <select name="show" id="show" class="form-select" v-model="formdata.show">
-                <option value="1" :selected="data[0].show === 1 ? 'selected' : ''">是</option>
-                <option value="0" :selected="data[0].show === 0 ? 'selected' : ''">否</option>
+                <option value="1" :selected="formdata.show === 1 ? 'selected' : ''">是</option>
+                <option value="0" :selected="formdata.show === 0 ? 'selected' : ''">否</option>
             </select>
         </div>
         <div class="form-group  w-50 mt-3">
             <label class="control-label fs-5">是否呈現在首頁?</label>
             <select name="master" id="master" class="form-select" v-model="formdata.master">
-                <option value="1" :selected="data[0].master === 1 ? 'selected' : ''">是</option>
-                <option value="0" :selected="data[0].master === 0 ? 'selected' : ''">否</option>
+                <option value="1" :selected="formdata.master === 1 ? 'selected' : ''">是</option>
+                <option value="0" :selected="formdata.master === 0 ? 'selected' : ''">否</option>
             </select>
         </div>
         <div class="form-group  w-100 mt-3">
             <label class="control-label fs-5">描述</label>
             <textarea name="description" id="description" cols="30" rows="5" v-model="formdata.description"
-                class="form-control">{{ data[0].description }}</textarea>
+                class="form-control">{{ formdata.description }}</textarea>
         </div>
         <div class="form-group w-100 mt-3">
             <table class="table">
@@ -62,7 +60,8 @@
                 <tbody>
                     <tr v-for="(img, index) in imgdata">
                         <td v-if="img !== undefined">{{ countIndex(index, this.imgdata) }}</td>
-                        <td v-if="img !== undefined"><img :src="img.img_path" height="250" :alt="index" v-if="img.img_path != ''" />
+                        <td v-if="img !== undefined"><img :src="img.img_path" height="250" :alt="index"
+                                v-if="img.img_path != ''" />
                         </td>
                         <td v-if="img !== undefined">
                             <input type="file" :id="fileId(index)" :name="fileName(index)" accept=".jpg"
@@ -74,7 +73,8 @@
                             </div>
                             <div class="form-group  mt-2 mb-3">
                                 <label class="control-label">呈現方式</label>
-                                <select :name="'typeimg['+index+']'" :id="'typeimg'+index" class="form-select form-select-sm" v-model="img.type" @change="setImgType(index)">
+                                <select :name="'typeimg[' + index + ']'" :id="'typeimg' + index"
+                                    class="form-select form-select-sm" v-model="img.type" @change="setImgType(index)">
                                     <option value="0" :selected="img.type === 0 ? 'selected' : ''">一般</option>
                                     <option value="1" :selected="img.type === 1 ? 'selected' : ''">燈箱圖</option>
                                     <option value="2" :selected="img.type === 2 ? 'selected' : ''">頁面底圖</option>
@@ -106,11 +106,17 @@
 export default {
     mounted() {
         console.log('Component mounted.')
-        this.imgs.map(img => {
-            if (img.img_path !== '') {
-                this.imgdata[img.seq] = img;
-            }
-        });
+        if(this.imgs!==''){
+            this.imgs.map(img => {
+                if (img.img_path !== '') {
+                    this.imgdata[img.seq] = img;
+                }
+            });
+        }
+        if (this.up == true) {
+            this.formdata = this.data[0];
+        }
+
     },
     data() {
         return {
@@ -118,7 +124,22 @@ export default {
             upimg: {
                 'imgs': []
             },
-            formdata: this.data[0],
+            formdata: {
+                'client':'',
+                'created_at':'',
+                'description':'',
+                'id':'',
+                'location':'',
+                'modby':'',
+                'name':'',
+                'photoby':'',
+                'master':0,
+                'show': 0 ,
+                'type_id': 1,
+                'updated_at':'',
+                'user_id': this.userId ,  
+                'value':'',
+            },
             delimgid: [],
             masterimg: '',
             imgtype: [],
@@ -126,7 +147,7 @@ export default {
         }
 
     },
-    props: ['data', 'createRoute', 'editRoute', 'up', 'typeOptions', 'imgs'],
+    props: ['data', 'createRoute', 'editRoute', 'up', 'typeOptions', 'imgs','userId'],
     methods: {
         doinit() {
             this.imgdata = this.imgs.map(img => {
@@ -153,7 +174,7 @@ export default {
                 if (us == -Infinity) {
                     us = 1;
                 }
-                this.imgdata.splice(us, 0, {'type':0,'img_path':''});
+                this.imgdata.splice(us, 0, { 'type': 0, 'img_path': '' });
             }
         },
         checkUpload(data) {
@@ -226,7 +247,9 @@ export default {
                     })
                 })
             } else {
-                console.log('create');
+                window.axios.post(`/projects`, this.formdata).then((res) => {
+                    console.log(res);
+                })
             }
         }
     },
