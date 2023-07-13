@@ -43,8 +43,8 @@ class ImgController extends Controller
         $imgs = $request->file('img')??[];
         $del = $input['del'];
         $del =explode(',',$del[0]);
-        $masterimg = $input['masterimg'];
-        
+        $masterimg = $input['masterimg']??'';
+        $imgtype = $input['imgtype']??'';
         
         foreach ($imgs as $key => $img) {
             $subFileName = $img->getClientOriginalExtension();
@@ -64,11 +64,17 @@ class ImgController extends Controller
                 $data->pic_name = $fileName;
                 $data->img_path = $imageUrl;
                 $data->seq= $key ;
+                $data->type= $imgtype[$key] ?? 0 ;
+                unset($imgtype[$key]);
                 $data->save();
             }else{
                 //更新
                 $query->pic_name = $fileName;
                 $query->img_path = $imageUrl;
+                if (isset($imgtype[$key])) {
+                    $query->type= $imgtype[$key];
+                    unset($imgtype[$key]);
+                }
                 $query->save();
             }
         }
@@ -83,6 +89,13 @@ class ImgController extends Controller
         Img::find($masterimg)->update(['master'=> 1]);
     }
 
+    if (!empty($imgtype)) {
+        foreach ($imgtype as $seq => $type) {
+            $query = Img::where([['prj_id','=',$prjId],['seq','=',$seq]])->first();
+            $query->type= $type;
+            $query->save();
+        }
+    }
         
     } catch (\Exception $e) {
         return $e;
