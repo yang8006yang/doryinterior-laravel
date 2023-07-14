@@ -43,7 +43,7 @@ class ImgController extends Controller
         $imgs = $request->file('img')??[];
         $del = $input['del'];
         $del =explode(',',$del[0]);
-        $masterimg = $input['masterimg']??'';
+        $masterimg = $input['masterimg']??[];
         $imgtype = $input['imgtype']??'';
         
         foreach ($imgs as $key => $img) {
@@ -65,7 +65,9 @@ class ImgController extends Controller
                 $data->img_path = $imageUrl;
                 $data->seq= $key ;
                 $data->type= $imgtype[$key] ?? 0 ;
-                unset($imgtype[$key]);
+                if(isset($imgtype[$key])){
+                    unset($imgtype[$key]);
+                }
                 $data->save();
             }else{
                 //更新
@@ -84,9 +86,9 @@ class ImgController extends Controller
         }
 
     //設定封面圖片
-    if ($masterimg !=='') {
+    if ($masterimg!=='') {
         Img::where([['prj_id','=',$prjId]])->update(['master'=> 0]);
-        Img::find($masterimg)->update(['master'=> 1]);
+        Img::where([['prj_id','=',$prjId],['seq','=',$masterimg]])->update(['master'=> 1]);
     }
 
     if (!empty($imgtype)) {

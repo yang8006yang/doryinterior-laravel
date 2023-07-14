@@ -68,7 +68,7 @@
                                 @change="uploadImg($event, index)">
                             <div class="mt-3 mb-2 form-check">
                                 <input class="form-check-input" type="radio" name="masterimg" :id="'masterimg' + img.id"
-                                    :checked="img.master == 1" @click="setmaster(img.id)">
+                                    :checked="img.master == 1" @click="setmaster(index)">
                                 <label class="form-check-label" :for="'masterimg' + img.id">專案封面</label>
                             </div>
                             <div class="form-group  mt-2 mb-3">
@@ -106,7 +106,7 @@
 export default {
     mounted() {
         console.log('Component mounted.')
-        if(this.imgs!==''){
+        if (this.imgs !== '') {
             this.imgs.map(img => {
                 if (img.img_path !== '') {
                     this.imgdata[img.seq] = img;
@@ -125,20 +125,20 @@ export default {
                 'imgs': []
             },
             formdata: {
-                'client':'',
-                'created_at':'',
-                'description':'',
-                'id':'',
-                'location':'',
-                'modby':'',
-                'name':'',
-                'photoby':'',
-                'master':0,
-                'show': 0 ,
+                'client': '',
+                'created_at': '',
+                'description': '',
+                'id': '',
+                'location': '',
+                'modby': '',
+                'name': '',
+                'photoby': '',
+                'master': 0,
+                'show': 0,
                 'type_id': 1,
-                'updated_at':'',
-                'user_id': this.userId ,  
-                'value':'',
+                'updated_at': '',
+                'user_id': this.userId,
+                'value': '',
             },
             delimgid: [],
             masterimg: '',
@@ -147,7 +147,7 @@ export default {
         }
 
     },
-    props: ['data', 'createRoute', 'editRoute', 'up', 'typeOptions', 'imgs','userId'],
+    props: ['data', 'createRoute', 'editRoute', 'up', 'typeOptions', 'imgs', 'userId'],
     methods: {
         doinit() {
             this.imgdata = this.imgs.map(img => {
@@ -213,45 +213,70 @@ export default {
             let img = e.target.files.item(0);
             this.upimg['imgs'][index] = img;
         },
-        setmaster(id) {
-            this.masterimg = id;
+        setmaster(index) {
+            this.masterimg = index;
         },
         setImgType(seq) {
             this.imgtype[seq] = $(`#typeimg${seq}`).val();
             console.log(this.imgtype);
         },
+        getImgFormdata() {
+            let formData = new FormData();
+            // 多圖片放入formData
+            Object.keys(this.upimg['imgs']).forEach(key => {
+                formData.append(`img[${key}]`, this.upimg['imgs'][key])
+            })
+            formData.append('prj_id', this.formdata.id)
+            formData.append('type', '0')
+            formData.append('del[]', this.delimgid)
+            formData.append('masterimg', this.masterimg)
+            Object.keys(this.imgtype).forEach(key => {
+                formData.append(`imgtype[${key}]`, this.imgtype[key])
+            })
+            return formData;
+        },
 
         save() {
-            if (this.up === true) {
+            if (this.up === true && this.formdata.name != '') {
                 // this.formdata['imgs'] = this.upimg['imgs'];
                 window.axios.put(`/projects/${this.formdata.id}`, this.formdata).then((res) => {
                     // 上傳圖片要FormData
-                    let formData = new FormData();
-                    // 多圖片放入formData
-                    Object.keys(this.upimg['imgs']).forEach(key => {
-                        formData.append(`img[${key}]`, this.upimg['imgs'][key])
-                    })
-                    formData.append('prj_id', this.formdata.id)
-                    formData.append('type', '0')
-                    formData.append('del[]', this.delimgid)
-                    formData.append('masterimg', this.masterimg)
-                    Object.keys(this.imgtype).forEach(key => {
-                        formData.append(`imgtype[${key}]`, this.imgtype[key])
-                    })
-
-                    window.axios.post(`/imgs`, formData).then((res) => {
-                        var currentUrl = window.location.href;
-                        var newUrl = currentUrl.replace('/edit', '');
-                        // location.replace(newUrl);
-                        console.log(res);
-                    })
+                    if (res.status == 200) {
+                        let formData = this.getImgFormdata();
+                        console.log(formData);
+                        window.axios.post(`/imgs`, formData).then((res) => {
+                            if (res.status == 200) {
+                                var currentUrl = window.location.href;
+                                var newUrl = currentUrl.replace('/edit', '');
+                                location.replace(newUrl);
+                            } else {
+                                alert('圖片更新失敗' + res.status + res.data)
+                            }
+                        })
+                    } else {
+                        alert('更新失敗' + res.status + res.data)
+                    }
                 })
-            } else {
-                window.axios.post(`/projects`, this.formdata).then((res) => {
-                    console.log(res);
+            } else if(this.up === false && this.formdata.name != '') {
+                window.axios.post(`/projects`, this.formdata).then((res) => {console.log(res);
+                    if (res.status == 200) {
+                        let formData = this.getImgFormdata();
+                        formData.append('prj_id', res.data)
+                        window.axios.post(`/imgs`, formData).then((res) => {
+                            if (res.status == 200) {
+                                var currentUrl = window.location.href;
+                                var newUrl = currentUrl.replace('/create', '/'+res.data);
+                                location.replace(newUrl);
+                            } 
+                        })
+                    } else {
+                        alert('更新失敗' + res.status + res.data)
+                    }
                 })
+            }else{
+                alert('專案名稱不可空白');
             }
-        }
+        },
     },
     watch: {
         masterimg: {

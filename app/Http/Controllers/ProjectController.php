@@ -44,25 +44,26 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        $data= new Project;
-        
-        $data->name=$request->name;
-        $data->type_id=$request->type_id;
-        $data->client=$request->client;
-        $data->location=$request->location;
-        $data->value=$request->value;
-        $data->photoby=$request->photoby;
-        $data->description=$request->description;
-        $data->show=$request->show;
-        $data->master=$request->master;
-        $data->user_id=$request->user_id;
         try{
+            $data= new Project;
+            
+            $data->name=$request->name;
+            $data->type_id=$request->type_id;
+            $data->client=$request->client;
+            $data->location=$request->location;
+            $data->value=$request->value;
+            $data->photoby=$request->photoby;
+            $data->description=$request->description;
+            $data->show=$request->show;
+            $data->master=$request->master;
+            $data->user_id=$request->user_id;
 
             $data->save();
+            return response($data->id, Response::HTTP_OK);
         }catch(\Exception $e){
-            var_dump($e->getMessage());
+            return response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        // var_dump($request->name);
+        
 
         // return redirect()->route('projects.index');
     }
@@ -108,6 +109,7 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
+        try {
         $input=$request->except(['_token','_method']);
         $data=Project::findOrFail($id);
         
@@ -125,6 +127,9 @@ class ProjectController extends Controller
         $data->save();
 
         return response(null, Response::HTTP_OK);
+        } catch (\Exception $e) {
+                
+        }
     }
 
     /**
