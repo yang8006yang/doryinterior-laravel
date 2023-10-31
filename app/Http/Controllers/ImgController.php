@@ -145,8 +145,9 @@ class ImgController extends Controller
      * @param  \App\Models\Img  $img
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Img $img)
+    public function destroy($id)
     {
         //
+        Img::destroy($id);
     }
 }

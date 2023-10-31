@@ -203,7 +203,6 @@ export default {
         delimg(index, id) {
             this.imgdata.splice(index, 1);
             this.delimgid.push(id);
-            console.log(this.delimgid);
         },
         back() {
             window.history.back()
@@ -247,7 +246,7 @@ export default {
                         window.axios.post(`/imgs`, formData).then((res) => {
                             if (res.status == 200) {
                                 var currentUrl = window.location.href;
-                                var newUrl = currentUrl.replace('/edit', '');
+                                var newUrl = currentUrl.replace('/edit', '/'+res.data);
                                 location.replace(newUrl);
                             } else {
                                 alert('圖片更新失敗' + res.status + res.data)

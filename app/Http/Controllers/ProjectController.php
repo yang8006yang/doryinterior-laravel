@@ -82,7 +82,9 @@ class ProjectController extends Controller
         if(!$project){
             return redirect()->route('projects.index');
         }
-        return view('projects.show', ['project'=>$project]);
+        $imgs=Img::where('prj_id', $id)->get();
+        $options = Type::pluck('text', 'id');
+        return view('projects.show', ['project'=>$project,'options'=>$options,'imgs'=>$imgs]);
     }
 
     /**
@@ -140,7 +142,10 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
+        $del=Img::where('prj_id',$id)->get();
+        Img::destroy($del);
         Project::destroy($id);
+
         return redirect()->route('projects.index');
     }
 }
